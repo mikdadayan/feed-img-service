@@ -8,6 +8,8 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteBucketCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -85,7 +87,21 @@ app.post(
 
 app.delete("/api/posts/:id", async (req: Request, res: Response) => {
   const id = +req.params.id;
+  const post = await prisma.posts.findUnique({ where: { id } });
+  if (!post) {
+    res.status(404).send("Post not found");
+    return;
+  }
+  const params = {
+    Bucket: bucketName,
+    Key: post.imageName,
+  };
 
+  const command = new DeleteObjectCommand(params);
+
+  await s3.send(command);
+
+  await prisma.possts.delete({ where: { id } });
   res.send({});
 });
 

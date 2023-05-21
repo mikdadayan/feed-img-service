@@ -78,6 +78,18 @@ app.post("/api/posts", upload.single("image"), (req, res) => __awaiter(void 0, v
 }));
 app.delete("/api/posts/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = +req.params.id;
+    const post = yield prisma.posts.findUnique({ where: { id } });
+    if (!post) {
+        res.status(404).send("Post not found");
+        return;
+    }
+    const params = {
+        Bucket: bucketName,
+        Key: post.imageName,
+    };
+    const command = new client_s3_1.DeleteObjectCommand(params);
+    yield s3.send(command);
+    yield prisma.possts.delete({ where: { id } });
     res.send({});
 }));
 const port = 3000;
