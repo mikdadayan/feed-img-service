@@ -4,7 +4,7 @@ import {
   awsSecretKey,
   bucketRegion,
   awsAccessKey,
-} from "../../utils/env-contstants";
+} from "../utils/env-contstants";
 
 export const s3 = new S3Client({
   credentials: {
