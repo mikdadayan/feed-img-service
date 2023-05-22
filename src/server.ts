@@ -8,10 +8,10 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-  DeleteBucketCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { createSuccessResponse } from "./utils/response-utils";
 
 dotenv.config();
 
@@ -51,7 +51,8 @@ app.get("/api/posts", async (req: Request, res: Response) => {
     const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 });
     post.imageUrl = url;
   }
-  res.send(posts);
+
+  return createSuccessResponse(res, "List of all posts.", 200, posts);
 });
 
 app.post(
@@ -81,7 +82,7 @@ app.post(
       },
     });
 
-    res.json(post);
+    return createSuccessResponse(res, "Created post successfully.", 201, post);
   }
 );
 
@@ -102,7 +103,8 @@ app.delete("/api/posts/:id", async (req: Request, res: Response) => {
   await s3.send(command);
 
   await prisma.possts.delete({ where: { id } });
-  res.send({});
+
+  return createSuccessResponse(res, "Post deleted successfuly.", 204, {});
 });
 
 const port = 3000;

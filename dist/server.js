@@ -20,6 +20,7 @@ const sharp_1 = __importDefault(require("sharp"));
 const client_1 = require("@prisma/client");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
+const response_utils_1 = require("./utils/response-utils");
 dotenv_1.default.config();
 const randomImageName = (bytes = 32) => crypto_1.default.randomBytes(bytes).toString("hex");
 const awsSecretKey = process.env.AWS_SECRET_KEY;
@@ -50,7 +51,7 @@ app.get("/api/posts", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const url = yield (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 60 * 60 });
         post.imageUrl = url;
     }
-    res.send(posts);
+    return (0, response_utils_1.createSuccessResponse)(res, "List of all posts.", 200, posts);
 }));
 app.post("/api/posts", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
@@ -74,7 +75,7 @@ app.post("/api/posts", upload.single("image"), (req, res) => __awaiter(void 0, v
             imageName: String(imageName),
         },
     });
-    res.json(post);
+    return (0, response_utils_1.createSuccessResponse)(res, "Created post successfully.", 201, post);
 }));
 app.delete("/api/posts/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = +req.params.id;
@@ -90,7 +91,7 @@ app.delete("/api/posts/:id", (req, res) => __awaiter(void 0, void 0, void 0, fun
     const command = new client_s3_1.DeleteObjectCommand(params);
     yield s3.send(command);
     yield prisma.possts.delete({ where: { id } });
-    res.send({});
+    return (0, response_utils_1.createSuccessResponse)(res, "Post deleted successfuly.", 204, {});
 }));
 const port = 3000;
 app.listen(port, () => {
