@@ -15,5 +15,6 @@ model Post {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   caption  String
   imageName   String
+  imageUrl  String
   createdAt DateTime @default(now())
 }
